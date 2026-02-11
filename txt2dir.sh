@@ -2,21 +2,51 @@
 
 shopt -s nullglob # stops bash from returning the string '*.txt' if no files exist
 
-
 RED="\033[0;31m"
 GREEN="\033[0;32m"
 BOLD="\033[1m"
 RESET="\033[0m"
 
+LOGFILE="activity.txt"
+
+files=( *.txt ) 
+
+log_message() {
+	echo "$(date '+Date: %Y-%m-%d, Hour: %H:%M:%S') - $1" >> "$LOGFILE"
+}
+
+num_of_files() {
+	local count=0
+	for file in "${files[@]}"; do
+		if [[ "$file" != "activity.txt" ]]; then
+			(( count++ ))
+		fi
+	done
+
+	echo "$count"
+}
 
 
-files=( *.txt )
-avbl_files="${#files[@]}"
+make_folder() {
+	mkdir -p "$1"
+	local msg="SUCCESS: Folder $1 CREATED!"
+	log_message "$msg"
+	echo -e "${GREEN}$msg${RESET}"
+}
 
 list_files() {
 	
+	# don't want 'activity.txt' to be included so, create a new list
+	local folders=()
+	for file in "${files[@]}"; do
+		if [[  "$file" != "activity.txt" ]]; then
+			folders+=( "$file" ) # parentheses tells bash its a new element in the list
+		fi
+	done
+
+		
 	# create a new fzf for listed files
-	local choice=$(printf "%s\n" "${files[@]}" | fzf --layout=reverse --height 30% --preview 'cat {}')
+	local choice=$(printf "%s\n" "${folders[@]}" | fzf --layout=reverse --height 30% --preview 'cat {}')
 	
 	# if the user presses 'Esc' or hits 'Ctrl + C'
 	# stops the script from running with an empty variable
@@ -38,17 +68,17 @@ list_files() {
 			continue
 		fi
 		
-			
-		echo "Make Folder: $foldername"
+					
+		make_folder "$foldername"
 	done < "$choice"
 }
 
 
 check_files() {
-	if [ "$avbl_files" -eq 0 ]; then
+	if [ "$(num_of_files)" -eq 0 ]; then
 		echo -e "${RED}SEARCH FAILED:${RESET} No .txt files were found!"
 	else
-		echo -e "${GREEN}SUCCESS:${RESET} [$avbl_files] .txt files were found!"
+		echo -e "${GREEN}SUCCESS:${RESET} [$(num_of_files)] .txt files were found!"
 		list_files
 	fi
 }
