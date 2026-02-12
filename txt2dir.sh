@@ -84,7 +84,15 @@ check_files() {
 }
 
 
+dynamic_folders() {
+	echo -e "${BOLD}Enter file names (separated by spaces):${RESET} "
+	read -a user_folders # the -a flag puts the input directly into an array
 
+	# loop through the array and make the folders
+	for folder in "${user_folders[@]}"; do
+		make_folder "$folder"
+	done
+}
 
 
 
@@ -113,6 +121,7 @@ case $choice in
 		;;
 	"Create folders dynamically")
 		clear
+		dynamic_folders
 		;;
 	"Exit")
 		clear
