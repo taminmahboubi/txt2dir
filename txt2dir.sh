@@ -30,13 +30,16 @@ loading_animation() {
 		
 		# create a ghost string (repeating the empty_char) using 'tr' to swap the remaining spaces to empty_char
 		local ghost=$(printf "%${remaining}s" | tr ' ' "%empty_char")
+		
+		# value for percent
+		local percent=$(( val * 100 / total_width ))
 
 		# Print: \r (start of line) + filled part + ghost part, %s prints bar, %s prints ghost
 
-		printf "\r%s%s" "$bar" "$ghost"
+		printf "\r%s%s Loading: %d%%" "$bar" "$ghost" "$percent"
 	       	sleep 0.05
 	done
-	echo ""
+	echo -e "\n"
 }	
 
 
