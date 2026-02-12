@@ -15,6 +15,31 @@ log_message() {
 	echo "$(date '+Date: %Y-%m-%d, Hour: %H:%M:%S') - $1" >> "$LOGFILE"
 }
 
+loading_animation() {
+	local total_width=20
+	local bar=""
+	local empty_char="░"
+	local full_char="█"
+
+	for val in {1..20}; do
+		# add solid block
+		bar+="$full_char"
+
+		# calculate how many ghost blocks are left
+		local remaining=$((total_width - val))
+		
+		# create a ghost string (repeating the empty_char) using 'tr' to swap the remaining spaces to empty_char
+		local ghost=$(printf "%${remaining}s" | tr ' ' "%empty_char")
+
+		# Print: \r (start of line) + filled part + ghost part, %s prints bar, %s prints ghost
+
+		printf "\r%s%s" "$bar" "$ghost"
+	       	sleep 0.05
+	done
+	echo ""
+}	
+
+
 num_of_files() {
 	local count=0
 	for file in "${files[@]}"; do
@@ -75,6 +100,7 @@ list_files() {
 
 
 check_files() {
+	loading_animation
 	if [ "$(num_of_files)" -eq 0 ]; then
 		echo -e "${RED}SEARCH FAILED:${RESET} No .txt files were found!"
 	else
@@ -87,6 +113,13 @@ check_files() {
 dynamic_folders() {
 	echo -e "${BOLD}Enter file names (separated by spaces):${RESET} "
 	read -a user_folders # the -a flag puts the input directly into an array
+	
+	# Check if the array is empty
+	if [ ${#user_folders[@]} -eq 0 ]; then
+		echo -e "${RED}ERROR: No names entered!${RESET}"
+		return
+	fi
+
 
 	# loop through the array and make the folders
 	for folder in "${user_folders[@]}"; do
